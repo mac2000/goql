@@ -1,0 +1,41 @@
+name: main
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            output: goql_windows_amd64.exe
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            output: goql_linux_amd64
+          - os: macos-latest
+            goos: darwin
+            goarch: amd64
+            output: goql_darwin_amd64
+          - os: macos-latest
+            goos: darwin
+            arch: arm64
+            output: goql_darwin_arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - run: go build -o ${{ matrix.output }}
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+      - name: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.output }}
+          path: ${{ matrix.output }}
